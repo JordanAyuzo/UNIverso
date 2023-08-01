@@ -1,3 +1,8 @@
 Prueba 1
+<<<<<<< HEAD
 conexion de computadoras  . 12 hola 
 prueba 3
+=======
+conexion de computadoras  . 12 hola
+VSC
+>>>>>>> c12ba22da4faca2acadac7a94d8ff67401b15608
