@@ -53,6 +53,33 @@
     import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     import { VRButton } from 'three/addons/webxr/VRButton.js';
     import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+    let cubeTextures = [
+      "https://threejs.org/examples/textures/cube/SwedishRoyalCastle/px.jpg",
+      "https://threejs.org/examples/textures/cube/SwedishRoyalCastle/nx.jpg",
+      "https://threejs.org/examples/textures/cube/SwedishRoyalCastle/py.jpg",
+      "https://threejs.org/examples/textures/cube/SwedishRoyalCastle/ny.jpg",
+      "https://threejs.org/examples/textures/cube/SwedishRoyalCastle/pz.jpg",
+      "https://threejs.org/examples/textures/cube/SwedishRoyalCastle/nz.jpg"
+    ]
+
+    
+    let texturas = [
+      //derecha(1 )
+      "environments/plano1/negx.jpg",
+      //atras(2)
+      "environments/plano1/posx.jpg",
+      //cielo(3)
+      "environments/plano1/posy.jpg",
+      //pasto abajo(4)
+      "environments/plano1/negy.jpg",
+      //izquierda(5)
+      "environments/plano1/negz.jpg",
+      //enfrente(6)
+      "environments/plano1/posz.jpg",
+
+    ];
+
+    let environment = new THREE.CubeTextureLoader().load(texturas);
     let xE = -2.5;
     let yE = 0.7;
     let zE = -10;
@@ -177,7 +204,7 @@
     raycaster = new THREE.Raycaster();
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xBFD1E5)
+    scene.background = environment;
     let controls
 
     const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -684,7 +711,7 @@
 
 
     crearLuces()
-    CrearPiso()
+    //CrearPiso()
     CrearPisoSala()
   /*  pared1();
     pared2(-12.5);
