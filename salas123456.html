@@ -173,7 +173,7 @@
   //  cargarPCsala1();
   function cargarPizarron() {
     for(var i=0;i<=6;i++){
-                            
+          //sala 2                  
         if(i==0){
             const loader = new GLTFLoader();
         loader.load(pizarron, function (gltf) {    
@@ -185,6 +185,7 @@
             }
             );
         }
+        //sala1
         if(i==1){
             const loader = new GLTFLoader();
         loader.load(pizarron, function (gltf) {    
@@ -196,6 +197,7 @@
             }
             );
         }
+        //sala 3
         if(i==2){
             const loader = new GLTFLoader();
         loader.load(pizarron, function (gltf) {    
@@ -207,24 +209,38 @@
             }
             );
         }
+        //sala 4
         if(i==3){
             const loader = new GLTFLoader();
         loader.load(pizarron, function (gltf) {    
             model = gltf.scene;
             scene.add(model);
-            //gltf.scene.rotation.y=0*Math.PI/180  
+            gltf.scene.rotation.y=180*Math.PI/180  
             gltf.scene.position.set(-3.5,1,19.5);
                     animate();
             }
             );
         }
+        //sala 5
         if(i==4){
             const loader = new GLTFLoader();
         loader.load(pizarron, function (gltf) {    
             model = gltf.scene;
             scene.add(model);
-            //gltf.scene.rotation.y=0*Math.PI/180  
+            gltf.scene.rotation.y=180*Math.PI/180  
             gltf.scene.position.set(-10.5,1,19.5);
+                    animate();
+            }
+            );
+        }
+          //sala 6
+          if(i==5){
+            const loader = new GLTFLoader();
+        loader.load(pizarron, function (gltf) {    
+            model = gltf.scene;
+            scene.add(model);
+            gltf.scene.rotation.y=180*Math.PI/180  
+            gltf.scene.position.set(-15,1,19.5);
                     animate();
             }
             );
