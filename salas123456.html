@@ -131,7 +131,7 @@
                         //console.log(boxSize);
 
                         const boxGeo = new THREE.BoxBufferGeometry(boxSize.x, boxSize.y, boxSize.z);
-                        const boxMat = new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0.5 });
+                        const boxMat = new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0.1 });
                         const boundingBoxMesh = new THREE.Mesh(boxGeo, boxMat);
                         boundingBoxMesh.position.copy(boundingBox.getCenter(new THREE.Vector3()));
 
@@ -172,16 +172,66 @@
     }
   //  cargarPCsala1();
   function cargarPizarron() {
-        const loader = new GLTFLoader();
-        loader.load(pizarron, function (gltf) {                       
-                    model = gltf.scene;
-                    scene.add(model);
-        gltf.scene.rotation.y=90*Math.PI/180  
-        gltf.scene.position.set(-10,1,-5);
+    for(var i=0;i<=6;i++){
+                            
+        if(i==0){
+            const loader = new GLTFLoader();
+        loader.load(pizarron, function (gltf) {    
+            model = gltf.scene;
+            scene.add(model);
+            gltf.scene.rotation.y=90*Math.PI/180  
+            gltf.scene.position.set(-10,1,-5);
                     animate();
-            });
-
+            }
+            );
+        }
+        if(i==1){
+            const loader = new GLTFLoader();
+        loader.load(pizarron, function (gltf) {    
+            model = gltf.scene;
+            scene.add(model);
+            gltf.scene.rotation.y=270*Math.PI/180  
+            gltf.scene.position.set(9.5,1,-5);
+                    animate();
+            }
+            );
+        }
+        if(i==2){
+            const loader = new GLTFLoader();
+        loader.load(pizarron, function (gltf) {    
+            model = gltf.scene;
+            scene.add(model);
+            gltf.scene.rotation.y=270*Math.PI/180  
+            gltf.scene.position.set(10,1,15);
+                    animate();
+            }
+            );
+        }
+        if(i==3){
+            const loader = new GLTFLoader();
+        loader.load(pizarron, function (gltf) {    
+            model = gltf.scene;
+            scene.add(model);
+            //gltf.scene.rotation.y=0*Math.PI/180  
+            gltf.scene.position.set(-3.5,1,19.5);
+                    animate();
+            }
+            );
+        }
+        if(i==4){
+            const loader = new GLTFLoader();
+        loader.load(pizarron, function (gltf) {    
+            model = gltf.scene;
+            scene.add(model);
+            //gltf.scene.rotation.y=0*Math.PI/180  
+            gltf.scene.position.set(-10.5,1,19.5);
+                    animate();
+            }
+            );
+        }
+        
     }
+  }
    
     
 
