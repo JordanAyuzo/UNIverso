@@ -1,0 +1,816 @@
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+</head>
+
+<body>
+
+  <p></p>
+  <label class="fila">Desplazamiento </label>
+
+  <label class="fila">X:</label>
+  <input type="number" id="movx" value="0.0" step="0.1">
+
+  <label class="fila">Y:</label>
+  <input type="number" id="movy" value="0.0" step="0.1">
+
+  <label class="fila">Z:</label>
+  <input type="number" id="movz" value="0.0" step="0.1">
+  <p></p>
+
+  <label class="fila">Rotación </label>
+
+  <label class="fila">X:</label>
+  <input type="number" id="rotax" value="0">
+
+  <label class="fila">Y:</label>
+  <input type="number" id="rotay" value="0">
+
+  <label class="fila">Z:</label>
+  <input type="number" id="rotaz" value="0">
+  <p></p>
+  <script type="importmap">
+                {
+                    "imports": {
+                        "three": "./build/three.module.js",
+                        "three/addons/": "./jsm/"
+                    }
+                }
+            </script>
+  <style type="text/css">
+    body {
+      overflow: hidden;
+    }
+  </style>
+
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+    import { VRButton } from 'three/addons/webxr/VRButton.js';
+    import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+    let xE = -2.5;
+    let yE = 0.7;
+    let zE = -10;
+    let signo = 1;
+    let rot = 0;
+    var nModelos = 7
+    var eModelos = 7
+    var eMod = 2;
+
+    let obj01;
+    let currentModel = null;
+    let mesh = null;
+    let model;
+    let boundingBoxMesh01 = null
+    let boundingBoxMesh02 = null;
+    let boundingBoxMesh03 = null;
+    let boundingBoxMesh04 = null;
+    let boundingBoxMesh05 = null;
+    let boundingBoxMesh06 = null;
+    let boundingBoxMesh07 = null;
+    let boundingBoxMesh08 = null;
+    let boundingBoxMesh09 = null;
+    let caja01 = null;
+    let cont = 0;
+
+    let Nombres = [
+      // 'Avance_Sala.fbx',
+      'glb/pc1.glb',
+      'glb/teclado2.glb',
+      'glb/mouse.glb',
+      'glb/escritorio1.glb',
+      'glb/base.glb',
+      'glb/silla.glb',
+      'glb/cpu.glb',
+
+    ];
+    let NombresE = [
+      'glb/Avance_Salas2.glb',
+      'glb/pizarrongrande.glb',
+      'glb/GABINETE.glb',
+      'glb/basurero.glb',
+      'glb/basurero.glb',
+      'glb/basurero.glb',
+      'glb/basurero.glb',
+    ]
+    let NombSa1 = [
+      'glb/pizarrongrande.glb',
+      'glb/GABINETE.glb',
+    ]
+    let posSa = [
+      [5, 2, 12.1],
+      [-1, 2, 12.1],
+    ]
+    let escSa = [
+      1,
+      1,
+    ]
+    let PosE = [
+      [0, 0, 0],
+      [5, 2, -12.1],
+      [-1, 2, -12.1],
+      [0, 0.7, 3],
+      [6.8, 0.7, 3],
+      [0, 0.7, 7],
+      [6.8, 0.7, 7],
+      [0, 0.7, 12],
+      [6.8, 0.7, 12],
+      [0, 0.7, 18],
+      [6.8, 0.7, 18],
+    ]
+    let escE = [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+
+    ]
+    let posiciones = [
+      [0.3, yE + 0.6, -0.3],
+      [0.3, yE + 0.6, 0.1],
+      [0.7, yE + 0.6, 0.1],
+      [0, yE, 0],
+      [0.5, yE - 0.1, 0.2],
+      [0.3, yE, 0.7],
+      [0.2, yE, 0.2],
+
+    ]
+    let posiciones1 = [
+      [0.3, yE + 0.6, 0.3],
+      [0.3, yE + 0.6, 0.1],
+      [0.7, yE + 0.6, 0.1],
+      [0.8, yE, 0],
+      [0.5, yE - 0.1, 0.2],
+      [0.3, yE, -0.7],
+      [0.2, yE, 0.2],
+
+    ]
+
+    let escala = [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+
+    let group = new THREE.Group();
+
+
+    let mesa, soldado, pControl;
+    var vasija;
+    let grupo;
+    var controller1, controller2;
+    var controllerGrip1, controllerGrip2;
+    var tempMatrix = new THREE.Matrix4();
+    var raycaster, intersected = [];
+    raycaster = new THREE.Raycaster();
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xBFD1E5)
+    let controls
+
+    const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000)
+    camera.position.set(0, 2, 5)
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio)
+    renderer.outputEncodig = THREE.sRGBEncoding;
+    document.body.appendChild(renderer.domElement);
+    renderer.shadowMap.enabled = true
+
+
+    controls = new OrbitControls(camera, renderer.domElement)
+    //controls.target.set(0,1.6,5)
+    controls.enableZoom = true
+    controls.enableRotate = true
+    controls.update();
+
+    for (let i = 0; i < eModelos; i++) {
+      cargarEst(NombresE[i], i, 0, 0)
+    }
+    for (let i = 0; i < eMod; i++) {
+      cargarEst1(NombSa1[i], i, 0, 0, 180)
+    }
+
+    function izquierda(xE, zE) {
+      for (let n = 0; n <= 2; n += 1) {
+        console.log(xE, zE);
+        for (let i = 0; i < nModelos; i++) {
+          cargarPista(Nombres[i], i, xE, zE, signo, rot)
+        }
+        xE += 0.85;
+      }
+    }
+
+    function centro(xE, zE) {
+      xE = 2
+      //zE+=2;
+      for (let n = 0; n <= 3; n += 1) {
+
+
+        for (let i = 0; i < nModelos; i++) {
+
+          cargarPista(Nombres[i], i, xE, zE, signo, rot)
+        }
+        xE += 0.85;
+      }
+
+    }
+
+
+    function derecha(xE, zE) {
+      xE = 7
+
+      for (let n = 0; n <= 2; n += 1) {
+
+        console.log(xE, zE);
+
+        //  zE+=2;
+        for (let i = 0; i < nModelos; i++) {
+
+          cargarPista(Nombres[i], i, xE, zE, signo, rot)
+          // sala1(Nombres[i],i,xE,zE,signo,180)
+        }
+        xE += 0.8;
+      }
+    }
+
+
+    function derecha1(xE, zE) {
+      xE = 7
+
+      for (let n = 0; n <= 2; n += 1) {
+
+        console.log(xE, zE);
+
+        //  zE+=2;
+        for (let i = 0; i < nModelos; i++) {
+
+          // cargarPista(Nombres[i],i,xE,zE,signo,rot)
+          sala1(Nombres[i], i, xE, zE, signo, 180)
+        }
+        xE += 0.8;
+      }
+    }
+
+    function izquierda1(xE, zE) {
+
+      for (let n = 0; n <= 2; n += 1) {
+
+        console.log(xE, zE);
+
+        //  zE+=2;
+        for (let i = 0; i < nModelos; i++) {
+
+          sala1(Nombres[i], i, xE, zE, signo, 180)
+        }
+        xE += 0.85;
+      }
+    }
+
+    function centro1(xE, zE) {
+      xE = 2
+      for (let n = 0; n <= 3; n += 1) {
+        for (let i = 0; i < nModelos; i++) {
+
+          sala1(Nombres[i], i, xE, zE, signo, 180)
+        }
+        xE += 0.85;
+      }
+    }
+
+    for (let h = 0; h <= 3; h++) {
+      izquierda(xE, zE)
+      centro(xE, zE);
+      derecha(xE, zE);
+      zE += 2;
+      xE = -2.5
+    }
+
+    zE = 2
+    for (let h = 0; h <= 3; h++) {
+      izquierda1(xE, zE)
+      centro1(xE, zE);
+      derecha1(xE, zE);
+      zE += 2;
+      xE = -2.5
+    }
+
+
+
+    // }
+    function isIterable(obj) {
+      if (obj == null) {
+        return false;
+      }
+      return typeof obj[Symbol.iterator] === "function";
+    }
+    function cargarModeloFbx(ruta, indice, xE, zE, rot) {
+      const fbxLoader = new FBXLoader()
+      fbxLoader.load(ruta,
+        (obj) => {
+          //                        obj.scale.setScalar(0.005)
+          obj.scale.setScalar(escala[indice])
+          obj.userData['name'] = "VASIJA-" + indice
+
+          obj.position.set(posiciones[indice][0] + xE * signo, posiciones[indice][1], posiciones[indice][2] + zE * signo)
+          obj.traverse(function (child) {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+          scene.add(obj);
+        });
+    }
+
+    function cargarPista(ruta, indice, x, z, signo, rot) {
+      //function cargarModeloFbx(x: any, y: any, z: any,esc:any) {
+      const loader = new GLTFLoader();
+
+      // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath('/examples/jsm/libs/draco/');
+      loader.setDRACOLoader(dracoLoader);
+
+      // Load a glTF resource
+      loader.load(
+        // resource URL
+        ruta,
+        // called when the resource is loaded
+        function (gltf) {
+          gltf.scene.scale.set(escala[indice], escala[indice], escala[indice]);
+          gltf.scene.position.set(posiciones[indice][0] + (x * signo), posiciones[indice][1], posiciones[indice][2] + (z * signo))
+          //console.log(posiciones[indice][0],posiciones[indice][1],posiciones[indice][2])
+          gltf.scene.rotation.y = rot * Math.PI / 180
+          scene.add(gltf.scene);
+
+          const mesh = gltf.scene.children[0]
+          //gltf.scale.setScalar(0.00005)
+          mesh.userData['name'] = "VASIJA-" + 0
+          console.log("Nombre hijo",mesh.userData['name'])
+          mesh.position.set = (0, 0, 0)
+          //       mesh.rotation.y=rot*Math.PI/360
+          gltf.animations; // Array<THREE.AnimationClip>
+          gltf.scene; // THREE.Group
+          gltf.scenes; // Array<THREE.Group>
+          gltf.cameras; // Array<THREE.Camera>
+          gltf.asset; // Object
+          group.add(gltf.scene)
+
+        },
+        // called while loading is progressing
+        function (xhr) {
+          console.log("Uno",(xhr.loaded / xhr.total * 100) + '% loaded');
+        },
+        // called when loading has errors
+        function (error) {
+          console.log('An error happened');
+        }
+      );
+
+
+    }
+
+
+
+    function sala1(ruta, indice, x, z, signo, rot) {
+      //function cargarModeloFbx(x: any, y: any, z: any,esc:any) {
+      const loader = new GLTFLoader();
+
+      // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath('/examples/jsm/libs/draco/');
+      loader.setDRACOLoader(dracoLoader);
+
+      // Load a glTF resource
+      loader.load(
+        // resource URL
+        ruta,
+        // called when the resource is loaded
+        function (gltf) {
+          gltf.scene.scale.set(escala[indice], escala[indice], escala[indice]);
+          gltf.scene.position.set(posiciones1[indice][0] + (x), posiciones1[indice][1], posiciones1[indice][2] + (z))
+          //console.log(posiciones[indice][0],posiciones[indice][1],posiciones[indice][2])
+          gltf.scene.rotation.y = rot * Math.PI / 180
+          scene.add(gltf.scene);
+
+          const mesh = gltf.scene.children[0]
+          //gltf.scale.setScalar(0.00005)
+          mesh.userData['name'] = "VASIJA-" + 0
+          mesh.position.set = (0, 0, 0)
+          //       mesh.rotation.y=rot*Math.PI/360
+          gltf.animations; // Array<THREE.AnimationClip>
+          gltf.scene; // THREE.Group
+          gltf.scenes; // Array<THREE.Group>
+          gltf.cameras; // Array<THREE.Camera>
+          gltf.asset; // Object
+          group.add(gltf.scene)
+
+        },
+        // called while loading is progressing
+        function (xhr) {
+          console.log("Dos",(xhr.loaded / xhr.total * 100) + '% loaded');
+        },
+        // called when loading has errors
+        function (error) {
+          console.log('An error happened');
+        }
+      );
+    }
+
+
+
+    function cargarEst(ruta, indice) {
+      //function cargarModeloFbx(x: any, y: any, z: any,esc:any) {
+      const loader = new GLTFLoader();
+
+      // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath('/examples/jsm/libs/draco/');
+      loader.setDRACOLoader(dracoLoader);
+
+      // Load a glTF resource
+      loader.load(
+        // resource URL
+        ruta,
+        // called when the resource is loaded
+        function (gltf) {
+          gltf.scene.scale.set(escE[indice], escE[indice], escE[indice]);
+          gltf.scene.position.set(PosE[indice][0], PosE[indice][1], PosE[indice][2])
+          console.log(posiciones[indice][0], posiciones[indice][1], posiciones[indice][2])
+          scene.add(gltf.scene);
+
+          const mesh = gltf.scene.children[0]
+          //gltf.scale.setScalar(0.00005)
+          mesh.userData['name'] = "VASIJA-" + 0
+          mesh.position.set = (0, 0, 0)
+
+          gltf.animations; // Array<THREE.AnimationClip>
+          gltf.scene; // THREE.Group
+          gltf.scenes; // Array<THREE.Group>
+          gltf.cameras; // Array<THREE.Camera>
+          gltf.asset; // Object
+          group.add(gltf.scene)
+        },
+        // called while loading is progressing
+        function (xhr) {
+          console.log("Tres",(xhr.loaded / xhr.total * 100) + '% loaded');
+        },
+        // called when loading has errors
+        function (error) {
+          console.log('An error happened');
+        }
+      );
+
+    }
+
+
+    function cargarEst1(ruta, indice) {
+      //function cargarModeloFbx(x: any, y: any, z: any,esc:any) {
+      const loader = new GLTFLoader();
+
+      // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath('/examples/jsm/libs/draco/');
+      loader.setDRACOLoader(dracoLoader);
+
+      // Load a glTF resource
+      loader.load(
+        // resource URL
+        ruta,
+        // called when the resource is loaded
+        function (gltf) {
+          gltf.scene.scale.set(escSa[indice], escSa[indice], escSa[indice]);
+          gltf.scene.position.set(posSa[indice][0], posSa[indice][1], posSa[indice][2])
+          console.log(posiciones[indice][0], posiciones[indice][1], posiciones[indice][2])
+          scene.add(gltf.scene);
+
+          const mesh = gltf.scene.children[0]
+          //gltf.scale.setScalar(0.00005)
+          mesh.userData['name'] = "VASIJA-" + 0
+          mesh.position.set = (0, 0, 0)
+
+          gltf.animations; // Array<THREE.AnimationClip>
+          gltf.scene; // THREE.Group
+          gltf.scenes; // Array<THREE.Group>
+          gltf.cameras; // Array<THREE.Camera>
+          gltf.asset; // Object
+          group.add(gltf.scene)
+
+        },
+        // called while loading is progressing
+        function (xhr) {
+
+          console.log("Cuatro",(xhr.loaded / xhr.total * 100) + '% loaded');
+
+        },
+        // called when loading has errors
+        function (error) {
+
+          console.log('An error happened');
+
+        }
+      );
+
+
+    }
+    ///********************
+    //****Atras**********+ 
+    var position01 = new THREE.Vector3(-2.9, 3.0, 0); // Coordenadas de posición
+
+    var boxGeometry01 = new THREE.BoxBufferGeometry(0.5, 5, 25.6);
+
+    // Crear el material de la caja delimitadora
+    var boxMaterial01 = new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0.5 });
+
+    // Crear la malla de la caja delimitadora
+    boundingBoxMesh01 = new THREE.Mesh(boxGeometry01, boxMaterial01);
+
+    boundingBoxMesh01.position.copy(position01);
+
+    //caja01 = boundingBoxMesh01;
+
+    // Agregar la malla al escenario para visualizarla
+    //   scene.add(boundingBoxMesh01);
+
+
+    //****Enfrente izquierda **********+ 
+    var position02 = new THREE.Vector3(9.85, 2.4, 7.17); // Coordenadas de posición
+    var boxGeometry02 = new THREE.BoxBufferGeometry(0.4, 4, 11.3);
+    var boxMaterial02 = new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0.6 });
+    boundingBoxMesh02 = new THREE.Mesh(boxGeometry02, boxMaterial02);
+    boundingBoxMesh02.position.copy(position02);
+    // scene.add(boundingBoxMesh02);
+
+
+    //****Enfrente derecha **********+ 
+    var position03 = new THREE.Vector3(9.85, 2.4, -7.05); // Coordenadas de posición
+    var boxGeometry03 = new THREE.BoxBufferGeometry(0.35, 4, 11.5);
+    var boxMaterial03 = new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0.6 });
+    boundingBoxMesh03 = new THREE.Mesh(boxGeometry03, boxMaterial03);
+    boundingBoxMesh03.position.copy(position03);
+    // scene.add(boundingBoxMesh03);
+
+    //****Enfrente centro **********+ 
+    var position04 = new THREE.Vector3(9.85, 2.4, 0.1);
+    var boxGeometry04 = new THREE.BoxBufferGeometry(0.3, 4, 0.4);
+    var boxMaterial04 = new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0.6 });
+    boundingBoxMesh04 = new THREE.Mesh(boxGeometry04, boxMaterial04);
+    boundingBoxMesh04.position.copy(position04);
+
+    //****Izquierda**********+ 
+    var position05 = new THREE.Vector3(3.47, 2.4, 12.65);
+    var boxGeometry05 = new THREE.BoxBufferGeometry(0.3, 4, 13.1);
+    var boxMaterial05 = new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0.6 });
+    boundingBoxMesh05 = new THREE.Mesh(boxGeometry05, boxMaterial05);
+    boundingBoxMesh05.position.copy(position05);
+    boundingBoxMesh05.rotation.y = 90 * Math.PI / 180
+    //scene.add(boundingBoxMesh05);
+
+
+    //****Derecha**********+ 
+    var position06 = new THREE.Vector3(3.4, 2.4, -12.59);
+    var boxGeometry06 = new THREE.BoxBufferGeometry(0.4, 4, 13.1);
+    var boxMaterial06 = new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0.6 });
+    boundingBoxMesh06 = new THREE.Mesh(boxGeometry06, boxMaterial06);
+    boundingBoxMesh06.position.copy(position06);
+    boundingBoxMesh06.rotation.y = 90 * Math.PI / 180
+    // scene.add(boundingBoxMesh06);
+
+
+    //****Adentro izquierda**********+ 
+    var position07 = new THREE.Vector3(4.8, 2.4, 0);
+    var boxGeometry07 = new THREE.BoxBufferGeometry(0.3, 4, 10.35);
+    var boxMaterial07 = new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0.6 });
+    boundingBoxMesh07 = new THREE.Mesh(boxGeometry07, boxMaterial07);
+    boundingBoxMesh07.position.copy(position07);
+    boundingBoxMesh07.rotation.y = 90 * Math.PI / 180
+    // scene.add(boundingBoxMesh07);
+    //****Adentro derecha**********+ 
+    var position08 = new THREE.Vector3(-2.4, 2.4, 0);
+    var boxGeometry08 = new THREE.BoxBufferGeometry(0.3, 4, 1);
+    var boxMaterial08 = new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0.6 });
+    boundingBoxMesh08 = new THREE.Mesh(boxGeometry08, boxMaterial08);
+    boundingBoxMesh08.position.copy(position08);
+    boundingBoxMesh08.rotation.y = 90 * Math.PI / 180
+
+
+    //****Piso**********+ 
+    var position09 = new THREE.Vector3(3.5, 0.55, 0.1);
+    var boxGeometry09 = new THREE.BoxBufferGeometry(0.25, 13, 25.5);
+    var boxMaterial09 = new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0.6 });
+    boundingBoxMesh09 = new THREE.Mesh(boxGeometry09, boxMaterial09);
+    boundingBoxMesh09.position.copy(position09);
+    boundingBoxMesh09.rotation.z = 90 * Math.PI / 180
+    boundingBoxMesh09.rotation.y = 360 * Math.PI / 180
+    //scene.add(boundingBoxMesh09);
+    //------------Grupacion de cajas--------------------------
+    //const group = new THREE.Group();
+    group.add(boundingBoxMesh01);
+    group.add(boundingBoxMesh02);
+    group.add(boundingBoxMesh03);
+    group.add(boundingBoxMesh04);
+    group.add(boundingBoxMesh05);
+    group.add(boundingBoxMesh06);
+    group.add(boundingBoxMesh07);
+    group.add(boundingBoxMesh08);
+    group.add(boundingBoxMesh09);
+    group.add(obj01);
+    scene.add(group);
+
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    document.addEventListener("click", (e) => {
+      var px = parseFloat(document.getElementById("movx").value);
+      var py = parseFloat(document.getElementById("movy").value);
+      var pz = parseFloat(document.getElementById("movz").value);
+
+      var rotx = parseFloat(document.getElementById("rotax").value);
+      var roty = parseFloat(document.getElementById("rotay").value);
+      var rotz = parseFloat(document.getElementById("rotaz").value);
+
+
+      if (e.target.matches("#movx")) {
+
+        group.position.x += px;
+       // model.position.x += px;
+      }
+      if (e.target.matches("#movy")) {
+        group.position.y += py;
+
+
+       // model.position.y += py;
+      }
+      if (e.target.matches("#movz")) {
+        group.position.z += pz;
+
+
+        //model.position.z += pz;
+      }
+      if (e.target.matches("#rotax")) {
+        //model.rotation.x += rotx * Math.PI / 180
+        group.rotation.x += rotx * Math.PI / 180;
+
+      }
+      if (e.target.matches("#rotay")) {
+        //model.rotation.y += roty * Math.PI / 180
+        group.rotation.y += roty * Math.PI / 180;
+
+      }
+      if (e.target.matches("#rotaz")) {
+        //model.rotation.z += rotz * Math.PI / 180
+        group.rotation.z += rotz * Math.PI / 180;
+
+      }
+
+    });
+
+
+
+    // cargarPista(Nombres[5],5)
+
+
+
+    crearLuces()
+    CrearPiso()
+    CrearPisoSala()
+  /*  pared1();
+    pared2(-12.5);
+    pared2(12.6)
+    pared4(9, 4.5, 0)
+    pared4(1, -2.5, 0)
+    pared3(7.1)
+    pared3(-6.9)
+   */ 
+    function CrearPiso() {
+
+      const texture = new THREE.TextureLoader().load(
+        'modelos/piedra.jpeg'
+      )
+      texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
+      texture.repeat.set(256, 256);
+      const materialPiso = new THREE.MeshBasicMaterial({ map: texture })
+      let plano = new THREE.Mesh(new THREE.BoxGeometry(10000, 0, 6000), materialPiso)
+      plano.position.z = 20
+      plano.castShadow = true
+      plano.receiveShadow = true
+      scene.add(plano);
+    }
+
+
+    function CrearPisoSala() {
+
+      const texture = new THREE.TextureLoader().load(
+        'modelos/loseta.jpeg'
+      )
+      texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
+      texture.repeat.set(50, 100);
+      const materialPiso = new THREE.MeshBasicMaterial({ map: texture })
+      let plano = new THREE.Mesh(new THREE.BoxGeometry(13, 0, 25), materialPiso)
+      plano.position.z = 0
+      plano.position.x = 3.5
+      plano.position.y = 0.65
+      plano.castShadow = true
+      plano.receiveShadow = true
+      scene.add(plano);
+      group.add(plano)
+    }
+  /*
+    function pared1() {
+      var geometry = new THREE.BoxGeometry(25, 3, 0.1);
+      var material = new THREE.MeshBasicMaterial({ color: 0x6D0394 });
+      var cube = new THREE.Mesh(geometry, material);
+      cube.rotation.y = 90 * Math.PI / 180
+      cube.position.x = -3
+      cube.position.y = 2.3
+      scene.add(cube)
+
+    }
+
+    function pared3(z) {
+      var geometry = new THREE.BoxGeometry(11, 3, 0.1);
+      var material = new THREE.MeshBasicMaterial({ color: 0x6D0394 });
+      var cube = new THREE.Mesh(geometry, material);
+      cube.rotation.y = 90 * Math.PI / 180
+      cube.position.x = 9.8
+      cube.position.z = z
+      cube.position.y = 2.3
+
+      scene.add(cube)
+
+    }
+
+    function pared2(z) {
+      var geometry = new THREE.BoxGeometry(13, 4, 0.1);
+      var material = new THREE.MeshBasicMaterial({ color: 0x6D0394 });
+      var cube = new THREE.Mesh(geometry, material);
+      // cube.rotation.y=90*Math.PI/180  
+      cube.position.z = z
+      cube.position.x = 3.5
+      cube.position.y = 3
+
+      scene.add(cube)
+
+    }
+
+    function pared4(x, xe, z) {
+      var geometry = new THREE.BoxGeometry(x, 1, 0.1);
+      var material = new THREE.MeshBasicMaterial({ color: 0x6D0394 });
+      var cube = new THREE.Mesh(geometry, material);
+      // cube.rotation.y=90*Math.PI/180  
+      cube.position.z = z
+      cube.position.x = xe
+      cube.position.y = 1
+
+      scene.add(cube)
+
+    }
+*/
+    animate();
+
+
+
+    function animate() {
+      requestAnimationFrame(animate)
+      render();
+
+    }
+    function render() {
+      controls.update();
+      renderer.render(scene, camera);
+
+    }
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight)
+    }
+
+    function crearLuces() {
+      var light = new THREE.HemisphereLight(0xffffff, 0x080820, 1);
+      /*light.position.set(0, 20, 0);           // MODIFIED SIZE OF SCENE AND SHADOW
+      light.castShadow = true;
+      light.shadow.camera.top = 200;           // MODIFIED FOR LARGER SCENE
+      light.shadow.camera.bottom = -200;       // MODIFIED FOR LARGER SCENE
+      light.shadow.camera.right = 200;         // MODIFIED FOR LARGER SCENE
+      light.shadow.camera.left = -200;         // MODIFIED FOR LARGER SCENE
+      light.shadow.mapSize.set(4096, 4096);*/
+      scene.add(light);
+    }
+
+  </script>
+</body>
+
+</html>
