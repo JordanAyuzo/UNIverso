@@ -1,0 +1,235 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+    <script type="importmap">
+                {
+                    "imports": {
+                        "three": "./build/three.module.js",
+                        "three/addons/": "./jsm/"
+                    }
+                }
+            </script>
+    <style type="text/css">
+        body {
+            overflow: hidden;
+        }
+    </style>
+
+
+    <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+    import { VRButton } from 'three/addons/webxr/VRButton.js';
+    import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+    
+    const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xBFD1E5) 
+        //scene.background = new THREE.Color(0xBFD1E5)
+        let controls
+
+        const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000)
+        //camera.position.set(150,100,80)
+        camera.position.set(-6,3,-10)
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio)
+        renderer.outputEncodig = THREE.sRGBEncoding;
+        document.body.appendChild(renderer.domElement);
+        renderer.shadowMap.enabled = true
+
+
+        controls = new OrbitControls(camera, renderer.domElement)
+        controls.target.set(0, 1.6, 5)
+        controls.update();
+    //  let prueba;
+    let xE = -2.5;
+    let yE = 0.2;
+    let zE = -10;
+    let signo = 1;
+    let rot = 90;
+    let cont = 0;
+    var nsalas=2;
+    var npc=7;
+   
+
+    let salas=[
+        'modelos/sala1y2_v4.glb',
+        'modelos/sala3456_v3.glb',
+    ]
+    var pc='modelos/escritorioCompleto.glb'
+    var pizarron='modelos/pizarrongrande.glb'
+    let posicionesSala = [
+        [0, 0, 0],
+        [0, 0, 10],
+    ]
+    let posicioneSala = [
+        [0.3, yE + 0.6, -0.3],
+        [1, yE, 1],//Sala3456
+    ]
+
+    let escalaSala = [
+        1,
+        1    
+    ]
+    const NOMBRES_MAYA = [];
+    //sala 1 2
+        NOMBRES_MAYA.push(["Cube008", "Cube010", "Cube020", "Cube024",
+            "Cube012", "Cube001", "Cube017", "Cube002",
+            "Cube006", "Cube022", "Cube011", "Cube003",
+            "Cube007", "Cube009", "Cube004", "Cube025", "Cube027",
+            "Cube023", "Cubo006", "Cubo001", "Cube029",
+            "puertaS1", "puertaS2", "puertaS1y2", "piso"
+        ]);
+        // sala 3 4 5 6
+        NOMBRES_MAYA.push(["c1", "c2", "c3", "c4", "c5", "c6", "c7",
+            "marco5y6_1", "marco5y6_2", "p0_2", "pared1",
+            "p2", "p3", "p4", "p5", "p6", "p9",
+            "piso1", "piso2", "pp1", "pp2", "pp3", "pp4",
+            "puertaS5", "puertaS3", "puertaS4", "puertaS5y6",
+            "puertaS6"
+        ]);
+   
+    
+
+    let sala12;
+    for (let i = 0; i < nsalas; i++) {
+      cargarSala(salas[i], i, 0, 0)
+    }
+    let model;
+    function cargarSala(ruta, indice) {
+         const loader = new GLTFLoader();
+
+        loader.load(
+        // resource URL
+        ruta,
+        // called when the resource is loaded
+        function (gltf) {
+         if(indice==1){
+          gltf.scene.rotation.y=180*Math.PI/180;
+         }
+          gltf.scene.scale.set(escalaSala[indice], escalaSala[indice], escalaSala[indice]);
+          gltf.scene.position.set(posicionesSala[indice][0], posicionesSala[indice][1], posicionesSala[indice][2])
+          console.log(posicioneSala[indice][0], posicioneSala[indice][1], posicioneSala[indice][2])
+          model = gltf.scene;
+          scene.add(gltf.scene);
+          const wallsBoundingBox = new THREE.Box3().setFromObject(model);
+                model.traverse(function (child) {
+                   // console.log(indice);
+                    //console.log(NOMBRES_MAYA[indice]);
+                    //console.log(child.name);
+                    if ( algunaCoincidenciaEnFila(NOMBRES_MAYA[indice], child.name) ) { //    child.isMesh 
+                        //console.log('Nombre de la malla:', child.name);
+                        // Crear una caja delimitadora para la malla actual
+                        const boundingBox = new THREE.Box3().setFromObject(child);
+                        const boxSize = boundingBox.getSize(new THREE.Vector3());
+                        //console.log(boxSize);
+
+                        const boxGeo = new THREE.BoxBufferGeometry(boxSize.x, boxSize.y, boxSize.z);
+                        const boxMat = new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0.5 });
+                        const boundingBoxMesh = new THREE.Mesh(boxGeo, boxMat);
+                        boundingBoxMesh.position.copy(boundingBox.getCenter(new THREE.Vector3()));
+
+                        scene.add(boundingBoxMesh);
+                    }
+                });
+
+        },
+        
+        // called while loading is progressing
+        function (xhr) {
+
+          console.log("Tres", (xhr.loaded / xhr.total * 100) + '% loaded');
+        },
+        // called when loading has errors
+        function (error) {
+          console.log('An error happened');
+        }
+        /////////sala 1,2 cajas delimitadoras///////////////
+        
+      );
+    }
+     // Función para verificar si hay alguna coincidencia entre los nombres de los vectores
+     function algunaCoincidenciaEnFila(filaNombres, filaMesh) {
+            return filaNombres.some(nombre => filaMesh.includes(nombre));
+        }
+
+    function cargarPCsala1() {
+        const loader = new GLTFLoader();
+        loader.load(pc, function (gltf) {                       
+                    model = gltf.scene;
+                    scene.add(model);
+                    camera.position.z = 5;
+
+                    animate();
+            });
+
+    }
+  //  cargarPCsala1();
+  function cargarPizarron() {
+        const loader = new GLTFLoader();
+        loader.load(pizarron, function (gltf) {                       
+                    model = gltf.scene;
+                    scene.add(model);
+        gltf.scene.rotation.y=90*Math.PI/180  
+        gltf.scene.position.set(-10,1,-5);
+                    animate();
+            });
+
+    }
+   
+    
+
+        cargarPizarron();
+        crearLuces()
+        CrearPiso()
+
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight)
+        }
+        function CrearPiso() {
+
+            const texture = new THREE.TextureLoader().load(
+            'pared/suelo.jpeg'
+            )
+            texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
+            texture.repeat.set(256, 256);
+            const materialPiso = new THREE.MeshBasicMaterial({ map: texture })
+            let plano = new THREE.Mesh(new THREE.BoxGeometry(10000, 0, 6000), materialPiso)
+            plano.position.z = 20
+            plano.castShadow = true
+            plano.receiveShadow = true
+            scene.add(plano);
+        }
+        
+      animate();
+
+
+
+        function animate() {
+          requestAnimationFrame(animate);
+          controls.update();
+          renderer.render(scene, camera);
+
+        }
+
+        function crearLuces() {
+
+            scene.add(new THREE.HemisphereLight(0x808080, 0x606060));
+           var light = new THREE.HemisphereLight(0xffffff, 0x080820, 1);
+
+      scene.add(light);
+        }
+
+    </script>
+</body>
+
+</html>
