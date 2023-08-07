@@ -1,0 +1,274 @@
+<html>
+<!-- 
+    Rellena los salones con sus escritorios, donde:
+
+    * cada escritorio corresponde a 3 sillas juntas, con sus respectiva mesa, monitor y ratón
+    * La escala de los salones cambio de 1 a 1.1, para tener un pasillo más amplio
+    * Se configuro el color rojo en el modelo glb
+    * el nombre de los mesh cambiaron
+-->
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+</head>
+
+<body>
+    <script type="importmap">
+                {
+                    "imports": {
+                        "three": "./build/three.module.js",
+                        "three/addons/": "./jsm/"
+                    }
+                }
+            </script>
+    <style type="text/css">
+        body {
+            overflow: hidden;
+        }
+    </style>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+        import { VRButton } from 'three/addons/webxr/VRButton.js';
+        import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xBFD1E5)
+        const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000)
+        //camera.position.set(150,100,80)
+        camera.position.set(-6, 3, -10)
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio)
+        renderer.outputEncodig = THREE.sRGBEncoding;
+        document.body.appendChild(renderer.domElement);
+        renderer.shadowMap.enabled = true
+        let controls
+        controls = new OrbitControls(camera, renderer.domElement)
+        controls.target.set(0, 1.6, 5)
+        controls.update();
+        
+        const nSalas = 1;
+        const nPizarrones = 6;
+
+        const rutasSalas = [
+            //'modelos/sala1y2_v4.glb',
+            'modelos/sala3456_v7.glb',
+        ]
+
+        const rutasPCsala = [
+            'modelos/escritorioCompleto3.glb', 
+            'modelos/escritorioCompleto4.glb'
+        ]
+        const ruta_pizarron = 'modelos/pizarrongrande.glb'
+
+        // x,y,z,angulo,escala de las salas [1,2]  y  [3456]
+        const posicionesSala = [
+            [0, 0, 0, 0, 1.1],
+            [0, 0, 10, 180, 1.1],
+        ]
+
+        // x,y,z,angulo,escala de los pizarrones 123456
+        const posicionesPizarron = [
+            [9.5, 1, -5, 270, 1],
+            [-10, 1, -5, 90, 1],
+            [10, 1, 15, 270, 1],
+            [-3.5, 1, 19.5, 180, .75],
+            [-10.5, 1, 19.5, 180, .75],
+            [-16, 1, 19.5, 180, .75],
+        ]
+
+        const posicionesPCsala1 = [
+            [-2.5, 0.2, -0.2, 90, 1],  
+            [-2.5, 0.2, -0.5, 90, 1],
+            [-2.5, 0.2, -8, 90, 1], 
+
+            [-3.5, 0.2, -0.2, 90, 1],
+            [-3.5, 0.2, -0.5, 90, 1],
+            [-3.5, 0.2, -8, 90, 1], 
+
+            [-5, 0.2, -0.2, 90, 1],
+            [-5, 0.2, -0.5, 90, 1],
+            [-5, 0.2, -8, 90, 1],
+
+            [-6.5, 0.2, -0.2, 90, 1],
+            [-6.5, 0.2, -0.5, 90, 1],
+            [-6.5, 0.2, -8, 90, 1],
+        ]
+
+
+        const posicionesPCsala2 = [
+            [2, 0.2, 5, 270, 1],  
+            [2, 0.2, -10.1, 270, 1],
+            [2, 0.2, -10.7, 270, 1], 
+
+            [3.5, 0.2, 5, 270, 1],
+            [3.5, 0.2, -10.1, 270, 1],
+            [3.5, 0.2, -10.7, 270, 1], 
+
+            [5, 0.2, 5, 270, 1],
+            [5, 0.2, 5, 270, 1],
+            [5, 0.2, -10.7, 270, 1],
+
+            [6.5, 0.2, -2.7, 270, 1],
+            [6.5, 0.2, -10.1, 270, 1],
+            [6.5, 0.2, -10.7, 270, 1],
+        ]
+
+
+        const posicionesPCsala3 = [
+            [2, 0.2, 10.2, 270, 1],  
+            [2, 0.2, 10.5, 270, 1],
+            [2, 0.2, 18.3, 270, 1], 
+
+            [3.5, 0.2, 10.2, 270, 1],
+            [3.5, 0.2, 10.5, 270, 1],
+            [3.5, 0.2, 18.3, 270, 1], 
+
+            [5, 0.2, 10.2, 270, 1],
+            [5, 0.2, 10.5, 270, 1],
+            [5, 0.2, 18.3, 270, 1],
+
+            [6.5, 0.2, 10.2, 270, 1],
+            [6.5, 0.2, 10.5, 270, 1],
+            [6.5, 0.2, 18.3, 270, 1],
+        ]
+
+
+        const NOMBRES_MAYA = [];
+        //sala 1 2
+        // NOMBRES_MAYA.push(["c1", "c2", "c3", "c4","c5", "marco1_1", "marco2_1",
+        //     "p1_1", "p1_2", "p2", "p3_2", "p4_1", "p5", "piso", "pp1", 
+        //     "pp3", "puertaS1", "puertaS2", "puertaS1y2", "cubi1", "cubi2"
+        // ]);
+        // sala 3 4 5 6
+        NOMBRES_MAYA.push(["c1", "c2", "c3", "c4", "c5", "c6", "c7",
+            "pared1", "p2_1", "p3", "p5", "p6_1", "p8_2", "p9_1",
+            "piso1", "piso2", "pp1", "pp2", "pp3", "pp4","pp1", "pp2", 
+            "pp4","piso1_1", "piso2_1", "marco5y6_2_1", "marco5y6_1_1",
+            "e6_1", "e6_2", "e6_3",
+            "puertaS3", "puertaS4", "puertaS5y6", "puertaS6"
+        ]);
+
+
+
+        let model;
+        function cargarSala(ruta, indice) {
+            const loader = new GLTFLoader();
+
+            loader.load(ruta, function (gltf) {
+                if (indice == 1) {
+                    gltf.scene.rotation.y = posicionesSala[indice][3] * Math.PI / 180;
+                }
+                gltf.scene.scale.set(posicionesSala[indice][4], posicionesSala[indice][4], posicionesSala[indice][4]);
+                gltf.scene.position.set(posicionesSala[indice][0], posicionesSala[indice][1], posicionesSala[indice][2])
+                model = gltf.scene;
+                scene.add(gltf.scene);
+
+                model.traverse(function(child) {
+                        if (child.isMesh) {
+                            console.log(child.name);
+                        }
+                });
+
+                const wallsBoundingBox = new THREE.Box3().setFromObject(model);
+                model.traverse(function (child) {
+                    if (algunaCoincidenciaEnFila(NOMBRES_MAYA[indice], child.name)) {
+                        const boundingBox = new THREE.Box3().setFromObject(child);
+                        const boxSize = boundingBox.getSize(new THREE.Vector3());
+                        const boxGeo = new THREE.BoxBufferGeometry(boxSize.x, boxSize.y, boxSize.z);
+                        const boxMat = new THREE.MeshBasicMaterial({ color: 0xffcc55, transparent: true, opacity: 0.1 });
+                        const boundingBoxMesh = new THREE.Mesh(boxGeo, boxMat);
+                        boundingBoxMesh.position.copy(boundingBox.getCenter(new THREE.Vector3()));
+                        scene.add(boundingBoxMesh);
+                    }
+                });
+            },// called while loading is progressing
+                function (xhr) {
+                    //console.log("Tres", (xhr.loaded / xhr.total * 100) + '% loaded');
+                },
+                // called when loading has errors
+                function (error) {
+                    //console.log('An error happened');
+                }
+            );
+        }
+
+        // Verifica coincidencia entre los nombres de todas 
+        // las mayas existentes en una sala
+        function algunaCoincidenciaEnFila(filaNombres, filaMesh) {
+            return filaNombres.some(nombre => filaMesh.includes(nombre));
+        }
+
+        for (let i = 0; i < nSalas; i++) {
+            cargarSala(rutasSalas[i], i, 0, 0);
+        }
+
+        function cargarPCsala(posicionesPCsala){
+            for( let i = 0, band=0; i < posicionesPCsala.length; i++,band++ ){ // cada iteracion rellena una fila
+                if(band==3){
+                    band=0;
+                }
+                if( (band % 2) == 0 ){
+                    cargarModelo( posicionesPCsala[i], rutasPCsala[0] ); // 3 escritorio completo
+                }else{
+                    cargarModelo( posicionesPCsala[i], rutasPCsala[1] ); // 4 escritorio completo
+                }  
+            }
+        }
+
+
+        function cargarPizarrones() {
+            for (var i = 0; i < nPizarrones; i++) {
+                cargarModelo( posicionesPizarron[i], ruta_pizarron );
+            }
+        }
+
+        //   0     1     2      3        4
+        //  posX, posY, posZ, angulo, escala
+        function cargarModelo(posiciones,rutaModelo) { 
+            const loader = new GLTFLoader();
+            loader.load(rutaModelo, function (gltf) {
+                model = gltf.scene;
+                scene.add(model);
+                gltf.scene.scale.set(posiciones[4], posiciones[4], posiciones[4]);
+                gltf.scene.rotation.y = posiciones[3] * Math.PI / 180
+                gltf.scene.position.set(posiciones[0], posiciones[1], posiciones[2]);
+                animate();
+            }
+            );
+        }
+
+
+        //cargarPCsala( posicionesPCsala1 );
+        //cargarPCsala( posicionesPCsala2 );
+        //cargarPCsala( posicionesPCsala3 );
+        //cargarPCsala( posicionesPCsala4 );
+        //cargarPCsala( posicionesPCsala5 );
+        //cargarPCsala( posicionesPCsala6 );
+        //cargarPizarrones();
+        crearLuces()
+
+        animate();
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        function crearLuces() {
+            scene.add(new THREE.HemisphereLight(0x808080, 0x606060));
+            var light = new THREE.HemisphereLight(0xffffff, 0x080820, 1);
+            scene.add(light);
+        }
+
+
+        /* Agregando ejes */
+        const axesHelper = new THREE.AxesHelper(45);
+        scene.add(axesHelper);
+
+    </script>
+</body>
+
+</html>
